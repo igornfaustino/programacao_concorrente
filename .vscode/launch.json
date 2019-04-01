@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - LambdaThread",
+            "request": "launch",
+            "mainClass": "progthreads.LambdaThread"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - CreateThreads",
+            "request": "launch",
+            "mainClass": "CreateThreads"
+        }
+    ]
+}

@@ -1,5 +1,9 @@
 package progthreads;
 
+/**
+ * Fa ̧ca uma Thread que monitora um conjunto de threads eexiba quais threads receberam sinais de interrupcao.
+ */
+
 import java.util.ArrayList;
 
 public class MonitoringThreads extends Thread {

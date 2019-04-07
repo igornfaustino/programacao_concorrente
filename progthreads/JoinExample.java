@@ -1,5 +1,10 @@
 package progthreads;
 
+/**
+ * Fa ̧ca uma thread Java que fica aguardando uma sequˆencianum ́erica
+ *  de tamanho arbitr ́ario digitado por usu ́ario pararealizar uma soma.  Use o join().
+ */
+
 import java.util.Scanner;
 
 public class JoinExample extends Thread {

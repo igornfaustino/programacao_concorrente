@@ -10,3 +10,4 @@ Igor N Faustino
 - `threadsignal` contem os exercicios referentes ao slide de `Sinalizaçãoo entre Threads`.
 - `monitors` contem os exercicios referentes ao slide de `Monitores`.
 - `semaphore` contem os exercicios referentes ao slide de `Semaforos` e do PDF `Exercícios: Padrões básicos de sincronização com Semáforos`.
+- `problemsclassics` contem os exercicios referentes ao slide de `Problemas classicos de concorrencia`

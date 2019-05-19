@@ -4,6 +4,33 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 public class ReaderWriter {
+    public static void main(String[] args) {
+        Buffer buff = new Buffer();
+        ReaderWriterAbstract readerWriter = new ReaderWriterWithWriterPriority();
+        new Writer(buff, readerWriter).start();
+        new Reader(buff, readerWriter).start();
+        new Reader(buff, readerWriter).start();
+        // new Reader(buff, readerPriority).start();
+        // new Reader(buff, readerPriority).start();
+    }
+}
+
+abstract class ReaderWriterAbstract {
+    int numReaders = 0;
+    Semaphore mutex = new Semaphore(1);
+    Semaphore wlock = new Semaphore(1);
+
+    // bloqueia escrita e incrementa numReaders
+    public abstract void startRead() throws InterruptedException;
+
+    public abstract void EndRead() throws InterruptedException;
+
+    public abstract void startWrite() throws InterruptedException;
+
+    public abstract void endWrite() throws InterruptedException;
+}
+
+class ReaderWriterWithReaderPriority extends ReaderWriterAbstract {
     int numReaders = 0;
     Semaphore mutex = new Semaphore(1);
     Semaphore wlock = new Semaphore(1);
@@ -13,7 +40,7 @@ public class ReaderWriter {
         // regiao critica, check numReaders and block write
         mutex.acquire();
         // se ninguem lendo
-        if (numReaders == 0){
+        if (numReaders == 0) {
             // espera escrita acabar e bloqueia ela
             wlock.acquire();
         }
@@ -27,7 +54,7 @@ public class ReaderWriter {
         // fala que nao esta lendo
         numReaders--;
         // se ninguem mais esta lendo
-        if (numReaders == 0){
+        if (numReaders == 0) {
             // libera a escrita
             wlock.release();
         }
@@ -45,29 +72,97 @@ public class ReaderWriter {
     }
 }
 
+class ReaderWriterWithWriterPriority extends ReaderWriterAbstract {
+    int numReaders = 0;
+    int wantToWrite = 0;
+    Semaphore mutex = new Semaphore(1);
+    Semaphore wlock = new Semaphore(1);
+    Semaphore innerWlock = new Semaphore(1);
+
+    // bloqueia escrita e incrementa numReaders
+    public void startRead() throws InterruptedException {
+        // regiao critica, check numReaders and block write
+        mutex.acquire();
+        // fala que está lendo
+        numReaders++;
+        // se ninguem lendo
+        if (numReaders == 1) {
+            // libera mutex para o escritor
+            mutex.release();
+            // espera escrita acabar e bloqueia ela
+            wlock.acquire();
+        } else {
+            mutex.release();
+        }
+    }
+
+    public void EndRead() throws InterruptedException {
+        mutex.acquire();
+        // fala que nao esta lendo
+        numReaders--;
+        // se ninguem mais esta lendo
+        if (numReaders == 0) {
+            // libera a escrita
+            wlock.release();
+        }
+        mutex.release();
+    }
+
+    public void startWrite() throws InterruptedException {
+        // espera pra escrevar
+        mutex.acquire();
+        // update number of writters wating...
+        wantToWrite++;
+        // if you are the first.. wait until nobody is reading
+        if (wantToWrite == 1) {
+            // libera o mutex
+            mutex.release();
+            // espera a sua vez
+            wlock.acquire();
+        } else {
+            mutex.release();
+        }
+        // wait your turn to write
+        innerWlock.acquire();
+    }
+
+    public void endWrite() throws InterruptedException {
+        // libera a escrita
+        mutex.acquire();
+        // update number of writters wating...
+        wantToWrite--;
+        // if you are the last.. release to somebody read
+        if (wantToWrite == 0)
+            wlock.release();
+        mutex.release();
+        innerWlock.release();
+    }
+}
+
 class Reader extends Thread {
     Buffer buff;
-    ReaderWriter readerWriter;
+    ReaderWriterAbstract readerWriter;
 
-    public Reader(Buffer buff, ReaderWriter readerWriter) {
+    public Reader(Buffer buff, ReaderWriterAbstract readerWriter) {
         this.buff = buff;
         this.readerWriter = readerWriter;
     }
 
     @Override
     public void run() {
-        while(true){
+        while (true) {
             try {
-                Thread.sleep(new Random().nextInt(5000));
                 readerWriter.startRead();
+                Thread.sleep(new Random().nextInt(5000));
                 System.out.println(Thread.currentThread().getName() + " reads " + buff.getBuff());
             } catch (Exception e) {
-                //TODO: handle exception
+                e.printStackTrace();
             } finally {
                 try {
                     readerWriter.EndRead();
+                    Thread.sleep(new Random().nextInt(5000));
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    // TODO: handle exception
                 }
             }
 
@@ -77,26 +172,27 @@ class Reader extends Thread {
 
 class Writer extends Thread {
     Buffer buff;
-    ReaderWriter readerWriter;
+    ReaderWriterAbstract readerWriter;
 
-    public Writer(Buffer buff, ReaderWriter readerWriter) {
+    public Writer(Buffer buff, ReaderWriterAbstract readerWriter) {
         this.buff = buff;
         this.readerWriter = readerWriter;
     }
 
     @Override
     public void run() {
-        while(true){
+        while (true) {
             try {
                 readerWriter.startWrite();
+                System.out.println("writting...");
                 buff.increment();
             } catch (Exception e) {
-                //TODO: handle exception
+                // TODO: handle exception
             } finally {
                 try {
                     readerWriter.endWrite();
                 } catch (Exception e) {
-                    //TODO: handle exception
+                    // TODO: handle exception
                 }
             }
 

@@ -6,7 +6,7 @@ import java.util.concurrent.Semaphore;
 public class ReaderWriter {
     public static void main(String[] args) {
         Buffer buff = new Buffer();
-        ReaderWriterAbstract readerWriter = new ReaderWriterWithWriterPriority();
+        ReaderWriterAbstract readerWriter = new ReaderWriterFair();
         new Writer(buff, readerWriter).start();
         new Reader(buff, readerWriter).start();
         new Reader(buff, readerWriter).start();
@@ -28,6 +28,54 @@ abstract class ReaderWriterAbstract {
     public abstract void startWrite() throws InterruptedException;
 
     public abstract void endWrite() throws InterruptedException;
+}
+
+class ReaderWriterFair extends ReaderWriterAbstract {
+    int numReaders = 0;
+    Semaphore mutex = new Semaphore(1);
+    Semaphore wlock = new Semaphore(1);
+    Semaphore queueSemaphore = new Semaphore(1, true);
+
+    // bloqueia escrita e incrementa numReaders
+    public void startRead() throws InterruptedException {
+        // enter on queue
+        queueSemaphore.acquire();
+        // regiao critica, check numReaders and block write
+        mutex.acquire();
+        // se ninguem lendo
+        if (numReaders == 0) {
+            // espera escrita acabar e bloqueia ela
+            wlock.acquire();
+        }
+        // fala que está lendo
+        numReaders++;
+        mutex.release();
+        queueSemaphore.release();
+    }
+
+    public void EndRead() throws InterruptedException {
+        mutex.acquire();
+        // fala que nao esta lendo
+        numReaders--;
+        // se ninguem mais esta lendo
+        if (numReaders == 0) {
+            // libera a escrita
+            wlock.release();
+        }
+        mutex.release();
+    }
+
+    public void startWrite() throws InterruptedException {
+        // espera pra escrevar
+        queueSemaphore.acquire();
+        wlock.acquire();
+        queueSemaphore.release();
+    }
+
+    public void endWrite() throws InterruptedException {
+        // libera a escrita
+        wlock.release();
+    }
 }
 
 class ReaderWriterWithReaderPriority extends ReaderWriterAbstract {

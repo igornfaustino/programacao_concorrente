@@ -1,0 +1,9 @@
+iniciando watcher...
+Modify: teste.txt
+Delete: sds
+iniciando watcher...Mon Jun 24 19:20:59 BRT 2019
+Created: oiMon Jun 24 19:21:09 BRT 2019
+iniciando watcher...Mon Jun 24 19:21:40 BRT 2019
+Modify: oi Mon Jun 24 19:21:43 BRT 2019
+iniciando watcher...Mon Jun 24 19:22:19 BRT 2019
+Modify: oi >> Mon Jun 24 19:22:52 BRT 2019

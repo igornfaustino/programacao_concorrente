@@ -12,3 +12,5 @@ Igor N Faustino
 - `semaphore` contem os exercicios referentes ao slide de `Semaforos` e do PDF `Exercícios: Padrões básicos de sincronização com Semáforos`.
 - `problemsclassics` contem os exercicios referentes ao slide de `Problemas classicos de concorrencia`
 - `locks` contem os exercicios referentes ao slide de `Sincronizadores: Locks, Latches e Barreiras`
+- `onedimensionalstencil` contem os exercicios referentes ao PDF `Atividades: CountDownLatch, CyclicBarrier, Phaser`
+- `tasks` contem os exercicios referentes ao slide de `Executando tarefas`
